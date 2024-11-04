@@ -1,0 +1,11 @@
+--- compile	2022-05-12 15:23:50.000000000 +0200
++++ compile	2024-11-04 11:22:21.482791703 +0100
+@@ -141,7 +141,7 @@
+   if [ "$jsmol" = 1 ] || [ "$opt" = "--jme" ]; then
+     echo "downloading JSME"
+     cd tmp;
+-    wget 'https://wimstest1.di.u-psud.fr/wims/jsme.tgz' -O jsme.tgz
++    wget 'https://wims1.math.cnrs.fr/wims/jsme.tgz' -O jsme.tgz
+     if [ -f "jsme.tgz" ] ; then
+       tar xzf jsme.tgz
+       rm -f jsme.tgz

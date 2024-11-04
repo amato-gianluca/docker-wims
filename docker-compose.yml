@@ -1,0 +1,12 @@
+services:
+  wims:
+    image: amatogianluca/wims:4.28
+    build:
+      context: .
+    security_opt:
+      - seccomp:unconfined
+    hostname: wims-4-28
+    container_name: wims-4-28
+    restart: always
+    ports:
+      - 10000:80
