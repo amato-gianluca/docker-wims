@@ -1,5 +1,6 @@
 FROM ubuntu:22.04
 
+# ARG variables are only used during building process. They are not persisted on the docker image.
 ARG DEBIAN_FRONTEND=noninteractive
 ARG TZ=Europe/Madrid
 # URL for the WIMS .tgz file from: https://sourcesup.renater.fr/frs/?group_id=379.
@@ -79,10 +80,22 @@ RUN apt-get update && \
     adduser --disabled-password --gecos '' wims && \
 # Set Time Zone.
     ln -snf /usr/share/zoneinfo/"$TZ" /etc/localtime && \
-    echo "$TZ" > /etc/timezone && \
-# Set locale to prevent error codes on generated wims phtml files, like:
+    echo "$TZ" > /etc/timezone
+
+# ENV variables are used during building process and persisted on the docker image.
+#
+# They cannot be set at the beginning, since the installation of some packages fail.
+#
+# Set up an internal environment variable with the built WIMS version.
+ENV WIMS_VERSION=${WIMS_VERSION}
+# Set up the default lang.
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+
+# Install all locales to prevent error codes on generated wims phtml files, like:
 # public_html/modules/adm/manage/lang/update.phtml.es
-    apt-get install -y locales locales-all
+RUN apt-get install -y locales locales-all
 
 # Compile WIMS
 USER wims
@@ -92,12 +105,12 @@ RUN wget -q ${WIMS_VERSION_URL} && \
     rm ${WIMS_VERSION}.tgz
 # Copy all current patches. Also the script to apply them properly.
 COPY patches/* /home/wims
-# Apply patches to WIMS code before compiling.
+# Apply patches to WIMS code before compiling. Compilation will use the ENV variabled defined before.
 RUN ./apply_patches.sh && \
     rm *.patch apply_patches.sh && \
-    (printf "\n\n${WIMS_PASS}" | LANG=en_US.UTF-8 LANGUAGE=en LC_CTYPE=en_US.UTF-8 LC_NUMERIC=en_US.UTF-8 ./compile --mathjax --jmol --modules --geogebra --shtooka)
+    (printf "\n\n${WIMS_PASS}" | ./compile --mathjax --jmol --modules --geogebra --shtooka)
 
-# Configure WIMS and entrypoint.
+# Configure WIMS and final cleanup.
 USER root
 COPY --chmod=0755 assets/entrypoint.sh /
 RUN apt-get -y install --no-install-recommends lsb-release net-tools && \
@@ -109,13 +122,6 @@ RUN apt-get -y install --no-install-recommends lsb-release net-tools && \
 
 # Metadata.
 LABEL maintainer="Gianluca Amato <gianluca.amato.74@gmail.com>"
-# Set up an internal environment variable with the built WIMS version.
-ENV WIMS_VERSION=${WIMS_VERSION}
-# Set up the default lang.
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en
-ENV LC_CTYPE en_US.UTF-8
-ENV LC_NUMERIC en_US.UTF-8
 VOLUME /home/wims/log
 VOLUME /home/wims/public_html/modules/devel
 ENTRYPOINT [ "/entrypoint.sh" ]
