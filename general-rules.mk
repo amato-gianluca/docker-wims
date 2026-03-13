@@ -14,7 +14,7 @@ build-quick: copy-env
 # source-env-file and target-env-file variables are defined on the invoking Makefile.
 .PHONY: copy-env
 copy-env:
-	cp -n $(source-env-file) $(target-env-file)
+	cp --update=none $(source-env-file) $(target-env-file)
 
 .PHONY: build-full-and-restart
 build-full-and-restart: build-full restart
