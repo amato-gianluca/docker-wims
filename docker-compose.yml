@@ -9,6 +9,7 @@ services:
         WIMS_VERSION_URL: ${DOWNLOAD_WIMS_FROM}
         WIMS_VERSION: ${WIMS_VERSION}
         WIMS_PASS: ${WIMS_PASS}
+        TZ: ${TZ}
     security_opt:
       - seccomp:unconfined
     environment:
