@@ -2,7 +2,7 @@
 
 if [ "$APP_ENV" != "prod" ];
 then
-  return;
+  exit;
 fi;
 
 # Only for testing environments: quick way of getting emails being sent.

@@ -2,7 +2,7 @@
 
 if [ "$APP_ENV" != "prod" ];
 then
-  return;
+  exit;
 fi;
 
 # Only for production site: enable HTTPS forwarding if REVERSE_PROXY variable is set.

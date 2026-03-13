@@ -2,7 +2,7 @@
 
 if [ "$APP_ENV" != "test" ];
 then
-  exit 0;
+  exit;
 fi;
 
 # Only for testing environment: add local default route IP to enable local administration.
