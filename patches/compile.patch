@@ -5,7 +5,7 @@
      echo "downloading JSME"
      cd tmp;
 -    wget 'https://wimstest1.di.u-psud.fr/wims/jsme.tgz' -O jsme.tgz
-+    wget 'https://wims1.math.cnrs.fr/wims/jsme.tgz' -O jsme.tgz
++    wget 'https://wiki.wimsedu.info/lib/exe/fetch.php?&media=installation:jsme.tgz' -O jsme.tgz
      if [ -f "jsme.tgz" ] ; then
        tar xzf jsme.tgz
        rm -f jsme.tgz
