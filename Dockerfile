@@ -1,15 +1,13 @@
 FROM ubuntu:22.04
 
-# ARG variables are only used during building process. They are not persisted on the docker image.
 ARG DEBIAN_FRONTEND=noninteractive
-ARG TZ=Europe/Madrid
-# URL for the WIMS .tgz file from: https://sourcesup.renater.fr/frs/?group_id=379.
-ARG WIMS_VERSION_URL=https://sourcesup.renater.fr/frs/download.php/file/6702/wims-4.28.tgz
-ARG WIMS_VERSION=${WIMS_VERSION:-wims-4.8}
-ARG WIMS_PASS
 
+# URL for the WIMS .tgz file from: https://sourcesup.renater.fr/frs/?group_id=379
+ARG WIMS_URL=https://sourcesup.renater.fr/frs/download.php/file/6702/wims-4.28.tgz
+ARG WIMS_VERSION=4.28
+
+# Install packages.
 RUN apt-get update && \
-# Install packages
     apt-get -y --no-install-recommends install \
       # Install Apache
       apache2 \
@@ -40,13 +38,13 @@ RUN apt-get update && \
       octave-statistics \
       graphviz \
       ldap-utils \
-      # scilab never worded for me
+      # scilab never worked for me
       scilab-cli \
       libwebservice-validator-html-w3c-perl \
       qrencode \
       fortune \
+      unzip \    
       zip \
-      unzip \
       libgmp-dev \
       openbabel \
       # Other recommended software
@@ -59,7 +57,30 @@ RUN apt-get update && \
       ssmtp \
       bsd-mailx \
       # Install patch
-      patch && \
+      patch \
+      # Install all locales to prevent error codes on generated wims phtml files, like:
+      # public_html/modules/adm/manage/lang/update.phtml.es
+      locales locales-all
+
+# Compile WIMS.
+RUN adduser --disabled-password --gecos '' wims
+USER wims
+WORKDIR /home/wims
+RUN wget -q ${WIMS_URL} && \
+    tar xzf wims-${WIMS_VERSION}.tgz && \
+    rm wims-${WIMS_VERSION}.tgz
+
+# Copy all current patches. Also the script to apply them properly.
+COPY patches/* /home/wims
+
+# Apply patches to WIMS code and compile.
+RUN ./apply_patches.sh && \
+    rm *.patch apply_patches.sh && \
+    yes "" | ./compile --mathjax --jmol --modules --geogebra --shtooka
+
+# Configure additional software.
+USER root
+RUN \
 # Enable CGI
     a2enmod cgid && \
 # Install support for working behind a reverse proxy
@@ -75,43 +96,9 @@ RUN apt-get update && \
     # recognize Octave anymore when the statistics package is loaded, while works
     # flawlessly otherwise.
     echo "pkg load statistics" >>  /etc/octaverc && \
-    echo "-Xss128k" >> /usr/share/octave/6.4.0/m/java/java.opts && \
-# Add wims user
-    adduser --disabled-password --gecos '' wims && \
-# Set Time Zone.
-    ln -snf /usr/share/zoneinfo/"$TZ" /etc/localtime && \
-    echo "$TZ" > /etc/timezone
-
-# ENV variables are used during building process and persisted on the docker image.
-#
-# They cannot be set at the beginning, since the installation of some packages fail.
-#
-# Set up an internal environment variable with the built WIMS version.
-ENV WIMS_VERSION=${WIMS_VERSION}
-# Set up the default lang.
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
-
-# Install all locales to prevent error codes on generated wims phtml files, like:
-# public_html/modules/adm/manage/lang/update.phtml.es
-RUN apt-get install -y locales locales-all
-
-# Compile WIMS
-USER wims
-WORKDIR /home/wims
-RUN wget -q ${WIMS_VERSION_URL} && \
-    tar xzf ${WIMS_VERSION}.tgz && \
-    rm ${WIMS_VERSION}.tgz
-# Copy all current patches. Also the script to apply them properly.
-COPY patches/* /home/wims
-# Apply patches to WIMS code before compiling. Compilation will use the ENV variabled defined before.
-RUN ./apply_patches.sh && \
-    rm *.patch apply_patches.sh && \
-    (printf "\n\n${WIMS_PASS}" | ./compile --mathjax --jmol --modules --geogebra --shtooka)
+    echo "-Xss128k" >> /usr/share/octave/6.4.0/m/java/java.opts
 
 # Configure WIMS and final cleanup.
-USER root
 COPY --chmod=0755 assets/ /wims
 RUN apt-get -y install --no-install-recommends lsb-release net-tools && \
     /wims/bin/post-install.sh  && \

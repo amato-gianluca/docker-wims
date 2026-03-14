@@ -43,8 +43,8 @@ show-admin-password:
 open-shell:
 	@$(docker-compose) exec wims bash
 
-.PHONY: activate-rsyslog-for-forensyc
-activate-rsyslog-for-forensyc:
+.PHONY: activate-rsyslog-for-forensic
+activate-rsyslog-for-forensic:
 	$(docker-compose) exec wims apt update
 	$(docker-compose) exec wims apt install -y rsyslog
 	$(docker-compose) exec wims /etc/init.d/rsyslog restart
@@ -64,11 +64,8 @@ activate-rsyslog-for-forensyc:
 .PHONY: test
 test: configuration-file-checking-echoed
 
-# On latest WIMS version, when defined WIMS_PASS variable,
-# the content of .wimspass is a randomly generated value.
 .PHONY: configuration-file-checking
 configuration-file-checking:
-	docker run --rm --entrypoint test $(WIMS_IMAGE_NAME) -f /home/wims/log/.wimspass;
 	docker run --rm --entrypoint test $(WIMS_IMAGE_NAME) ! -f /home/wims/log/wims.conf;
 	@echo "OK: Configuration files checking passed!"
 
@@ -91,5 +88,5 @@ logs-show:
 	then \
 	  docker logs $(WIMS_CONTAINER_NAME) | tac; \
 	else \
-		journalctl CONTAINER_TAG=$(WIMS_CONTAINER_TAG) --reverse; \
+	  journalctl CONTAINER_TAG=$(WIMS_CONTAINER_TAG) --reverse; \
 	fi;

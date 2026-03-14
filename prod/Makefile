@@ -26,7 +26,7 @@ warmup:
 		-av /home/wims/log/ /home/wims/log-volume/; \
 	  # 2. Override initial content, if any, with specific content. \
 	  rsync -av $(current-dir)log-volume-overriding/ $(current-dir)log-volume/; \
-	  # 3. Be sure the whole content is propietary for wims:wims user. \
+	  # 3. Be sure the whole content is owned by the wims:wims user. \
 	  docker run \
 		--rm \
 		--mount type=bind,src=$(current-dir)log-volume,target=/home/wims/log-volume \

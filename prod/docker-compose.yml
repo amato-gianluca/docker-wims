@@ -6,19 +6,15 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        WIMS_VERSION_URL: ${DOWNLOAD_WIMS_FROM}
+        WIMS_URL: ${WIMS_URL}
         WIMS_VERSION: ${WIMS_VERSION}
-        WIMS_PASS: ${WIMS_PASS}
     security_opt:
       - seccomp:unconfined
     environment:
-      APP_ENV: ${APP_ENV}
-      ## Other variables you can define here:
-      ## For 2_apache2_http-proto.sh:
-      # REVERSE_PROXY:
-      ## For 1_ssmtp.sh:
-      # SSMTP_MAILHUB:
-      # SSMTP_HOSTNAME:
+      MANAGER_SITE: ${MANAGER_SITE}
+      TZ: ${TZ}
+      WIMS_PASS: ${WIMS_PASS}
+      ## Other variables may be defined here: check the README.md.
     hostname: ${container_name}
     container_name: ${container_name}
     restart: always

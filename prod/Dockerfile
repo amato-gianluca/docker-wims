@@ -16,6 +16,6 @@ RUN /wims/bin/post-install.sh && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Metadata.
-LABEL maintainer="Gianluca Amato <gianluca.amato.74@gmail.com>"
-LABEL description="Production-ready WIMS service"
+# Metadata
+LABEL org.opencontainers.image.authors="Jordi Pujol-Ahulló <jordi.pujol@urv.cat>"
+LABEL org.opencontainers.image.description="Production-ready WIMS service"

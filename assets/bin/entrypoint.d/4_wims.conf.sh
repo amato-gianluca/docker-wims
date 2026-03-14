@@ -1,10 +1,18 @@
 #!/bin/bash
 
-# For all environments: create required wims.conf file if missing.
-if  [ ! -f /home/wims/log/wims.conf ];
-then
-  echo "threshold1=$(($(cat /proc/cpuinfo | grep processor | wc -l) * 150))" > log/wims.conf
-  echo "threshold2=$(($(cat /proc/cpuinfo | grep processor | wc -l) * 300))" >> log/wims.conf
-  chown wims:wims log/wims.conf
-  chmod go-rwx log/wims.conf
-fi;
+config_file=/home/wims/log/wims.conf
+
+if [ ! -f "$config_file" ]; then
+    echo "threshold1=$(($(grep -c processor /proc/cpuinfo) * 150))" > "$config_file"
+    echo "threshold2=$(($(grep -c processor /proc/cpuinfo) * 300))" >> "$config_file"
+    chown wims:wims "$config_file"
+    chmod go-rwx "$config_file"
+
+    if [ -n "$MANAGER_SITE" ]; then
+        if [ "$MANAGER_SITE" = "auto" ]; then
+            echo "manager_site=$(route -n | grep "UG" | awk '{print $2}')" >> "$config_file"
+        else
+            echo "manager_site=$MANAGER_SITE" >> "$config_file"
+        fi
+    fi
+fi
