@@ -1,4 +1,4 @@
-FROM amatogianluca/wims:wims-4.28
+FROM amatogianluca/wims:4.30
 
 ENV APP_ENV=prod
 USER root

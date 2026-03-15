@@ -3,8 +3,8 @@ FROM ubuntu:22.04
 ARG DEBIAN_FRONTEND=noninteractive
 
 # URL for the WIMS .tgz file from: https://sourcesup.renater.fr/frs/?group_id=379
-ARG WIMS_URL=https://sourcesup.renater.fr/frs/download.php/file/6702/wims-4.28.tgz
-ARG WIMS_VERSION=4.28
+ARG WIMS_URL=https://sourcesup.renater.fr/frs/download.php/file/6724/wims-4.30.tgz
+ARG WIMS_VERSION=4.30
 
 # Install packages.
 RUN apt-get update && \
